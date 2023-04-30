@@ -79,6 +79,9 @@ var connectionCounterMutex sync.Mutex
 // Handle is the function that knows which and how a function should
 // be executed when a JSON RPC request is received
 func (h *Handler) Handle(req handleRequest) types.Response {
+	fmt.Println("method name: %v\n", string(req.Method))
+	fmt.Println("jrpc name: %v\n===========================\n\n", string(req.JSONRPC))
+
 	log := log.WithFields("method", req.Method, "requestId", req.ID)
 	connectionCounterMutex.Lock()
 	connectionCounter++
@@ -91,7 +94,7 @@ func (h *Handler) Handle(req handleRequest) types.Response {
 	}()
 	log.Debugf("Current open connections %d", connectionCounter)
 	log.Debugf("request params %v", string(req.Params))
-	log.Debugf("debug on test:: A\n")
+	log.Debugf("debug on test:: A :: \n")
 
 	service, fd, err := h.getFnHandler(req.Request)
 	if err != nil {
@@ -147,8 +150,9 @@ func (h *Handler) Handle(req handleRequest) types.Response {
 			return types.NewResponse(req.Request, nil, types.NewRPCError(types.InvalidParamsErrorCode, "Invalid Params"))
 		}
 	}
-	log.Debugf("debug on test:: J\n")
+
 	output := fd.fv.Call(inArgs)
+	log.Debugf("debug on test:: J => %v || %v\n", inArgs, output)
 	if err := getError(output[1]); err != nil {
 		log.Debugf("debug on test:: Jerr\n")
 		log.Infof("failed call: [%v]%v. Params: %v", err.ErrorCode(), err.Error(), string(req.Params))
